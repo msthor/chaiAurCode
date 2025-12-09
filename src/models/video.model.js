@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import User from "./user.model.js";
+// import User from "./models/user.model.js";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
  
 

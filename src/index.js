@@ -1,39 +1,28 @@
-import express from "express";  
-const app = express();
-import { config } from "dotenv";
-config(); 
+// Load environment variables FIRST
+import dotenv from "dotenv";
+dotenv.config();
+
+import express from "express";
+import app from "./app.js";
 import { connectDB } from "./db/index.js";
 
-// Connect to the database
-      connectDB()
-        .then(() => {
-            app.listen(process.env.PORT, ()=>{
-                console.log(`Server is running on port ${process.env.PORT}`);
-            })
-        })
-        .catch((error) => {
-            console.log("Failed to start server due to database connection error", error);
-        });
+// Constants
+const PORT = process.env.PORT || 8000;
 
+// Start the server only after DB connection
+const startServer = async () => {
+  try {
+    await connectDB();
+    console.log(" Connected to database successfully");
 
-// import mongoose, { mongo }  from "mongoose";
-// import { DB_NAME} from "./constants.js";
+    app.listen(PORT, () => {
+      console.log(` Server is running on port ${PORT}`);
+    });
 
-/* (async ()=>{
-    try {
-        await mongoose.connect(`${process.env.mongoDb_URI}/${DB_NAME}`)
-        app.on("error", (err)=>{
-            console.log("Error connecting to database", err);
-            throw err;
-        })
-        console.log("Connected to database successfully");
+  } catch (error) {
+    console.error(" Failed to start server:", error);
+    process.exit(1); // Exit the process on failure
+  }
+};
 
-
-        app.listen(process.env.PORT, ()=>{
-            console.log(`Server is running on port ${process.env.PORT}`);
-        })
-    } catch (error) {
-        console.log("Error connecting to database", error);
-    }
-})()
-*/
+startServer();
