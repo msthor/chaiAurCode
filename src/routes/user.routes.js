@@ -1,16 +1,20 @@
 import { Router } from "express";
-import {registerUser, loggedInUser , logoutUser} from "../controllers/user.controller.js";
+import {registerUser, loggedInUser , logoutUser,refreshAccessToken} from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
+
 
 const router = Router();
 
 router.post("/register", upload, registerUser);
 
-router.route("/login").post(upload, loggedInUser);
-router.route("/me").get(verifyJWT, loggedInUser);
+router.post("/login" , upload, loggedInUser);
+
+//secure route
+router.post("/logout", verifyJWT, logoutUser);
+router.post("/refresh-token", refreshAccessToken);
+
 export default router;
 
 
 
-// i need to fied route bcoz i change now 
