@@ -20,9 +20,9 @@ const generateAccessAndRefreshToken = async (userId) => {
 
 // REGISTER USER
 const registerUser = asyncHandler(async (req, res) => {
-    const { username, email, fullname, password } = req.body;
+    const { username, email, fullName, password } = req.body;
 
-    if (!username || !email || !fullname || !password) {
+    if (!username || !email || !fullName || !password) {
         throw new ApiError(400, "All fields are required");
     }
 
@@ -41,7 +41,7 @@ const registerUser = asyncHandler(async (req, res) => {
     const user = await User.create({
         username,
         email,
-        fullname,
+        fullName,
         password,
         avatar: avatarUpload.url,
         coverImage: coverUpload?.url || null
@@ -173,29 +173,54 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 
 
-// const changeCurrentPassword = asyncHandler(async (req, res) => {
-//     const { oldPassword, newPassword } = req.body;
+const changeCurrentPassword = asyncHandler(async (req, res) => {
+
+    const { oldPassword, newPassword } = req.body;
     
-//     const user = User.findById(req.user._id);
+    const user = User.findById(req.user._id);
 
-//     const isPasswordValid = await user.isPasswordCorrect(oldPassword);
-//     if (!isPasswordValid) {
-//         throw new ApiError(401, "Old password is incorrect");
-//     }
-//     user.password = newPassword;
-//     await user.save({validateBeforeSave:false});   
+    const isPasswordValid = await user.isPasswordCorrect(oldPassword);
+     if (!isPasswordValid) {
+        throw new ApiError(401, "Old password is incorrect");
+    }
+    user.password = newPassword;
+    await user.save({validateBeforeSave:false});   
 
-//     return res.status(200).json(new ApiResponse(true, "Password changed successfully"));  
+    return res.status(200).json(new ApiResponse(true, "Password changed successfully"));  
 
-// });
+});
 
-// 25 min done video no 17
-// const getCurrent // 20:36 video no 18
-// & previous video no 16 code also not writedd
+
+// get current user bcause req.user is there from auth middleware
+ const getCurrentUser = asyncHandler(async (req, res) => {
+    return res.status(200)
+    .json(200,req.user, "current user fetched successfully");
+ });
+
+const updateAccountDetails = asyncHandler(async (req, res) => {
+    const { email, fullName } = req.body;
+    if(!email || !fullName){
+        throw new ApiError(400, "email and fullName are required");
+    }
+    const updatedUser = await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set: {
+                email,
+                fullName
+            }
+        },
+        {
+            new: true
+        }
+    ).select("-password -refreshToken");
+});
 
 export {
     registerUser,
     loggedInUser,
     logoutUser,
-    refreshAccessToken
+    refreshAccessToken ,
+    changeCurrentPassword,
+    getCurrentUser
 }
