@@ -17,7 +17,5 @@ const storage = multer.diskStorage({
     }
 });
 
-export const upload = multer({ storage }).fields([
-    { name: "avatar", maxCount: 1 },
-    { name: "coverImage", maxCount: 1 }
-]);
+// Export the MULTER INSTANCE — NOT fields()
+export const upload = multer({ storage });
