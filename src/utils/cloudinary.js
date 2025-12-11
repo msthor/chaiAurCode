@@ -3,7 +3,6 @@ dotenv.config();
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
 
-// Cloudinary configuration
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -14,29 +13,35 @@ const uploadOnCloudinary = async (localFilePath) => {
   try {
     if (!localFilePath) return null;
 
-    // Upload file to Cloudinary
     const result = await cloudinary.uploader.upload(localFilePath, {
       resource_type: "auto",
     });
 
-    // Remove local file after upload
-    if (fs.existsSync(localFilePath)) {
-      fs.unlinkSync(localFilePath);
-    }
+    fs.existsSync(localFilePath) && fs.unlinkSync(localFilePath);
 
     return result;
 
   } catch (err) {
-    // Remove file even if upload fails
-    if (fs.existsSync(localFilePath)) {
-      fs.unlinkSync(localFilePath);
-    }
-
+    fs.existsSync(localFilePath) && fs.unlinkSync(localFilePath);
     console.error("Cloudinary Upload Error:", err);
     return null;
   }
 };
-console.log("Cloudinary Config:", cloudinary.config());
 
+// DELETE OLD IMAGE
+const deleteFromCloudinaryByUrl = async (cloudinaryUrl) => {
+  if (!cloudinaryUrl) return;
 
-export { uploadOnCloudinary };
+  try {
+    const parts = cloudinaryUrl.split("/");
+    const filename = parts[parts.length - 1];  // abcxyz.png
+    const publicId = filename.split(".")[0];   // abcxyz
+
+    await cloudinary.uploader.destroy(publicId);
+
+  } catch (err) {
+    console.error("Cloudinary Delete Error:", err);
+  }
+};
+
+export { uploadOnCloudinary, deleteFromCloudinaryByUrl };
